@@ -1,0 +1,24 @@
+def mw_deadbeef_hash(a1, a2):
+    v4 = 0xDEADBEEF
+    for i in range(a2):
+        v4 = (v4 + a1[i]) ^ ((v4 + a1[i]) << 8)
+        v4 = v4 & 0xFFFFFFFF
+    return v4
+
+dll_name = bytes('KERNEL32.DLL', 'utf-16le')
+print(dll_name)
+hex(mw_deadbeef_hash(dll_name,len(dll_name)-1))
+
+import pickle
+
+out = {}
+
+p = pickle.load(open('exports.pickle','rb'))
+
+for dll in p:
+    for exp in dll.get('exports'):
+        hash_value = mw_deadbeef_hash(bytes(exp, 'utf8'), len(bytes(exp, 'utf8')))
+        out[hash_value] = f"{exp}={hash_value},"
+
+for k in out:
+    print(out[k])
